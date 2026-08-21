@@ -1,0 +1,10 @@
+.env
+target/
+.quarkus/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+.mvn/
+mvnw
+mvnw.cmd
