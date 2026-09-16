@@ -3,6 +3,10 @@
 A Java SDK for [Tavily](https://tavily.com/)'s web-access API, plus a Quarkus + LangChain4j
 agent demo that uses it to answer airline-loyalty questions against the live web.
 
+> **Unofficial community SDK — not affiliated with or endorsed by Tavily.**
+> The `com.tavily` Maven coordinates and package name are for readability only;
+> this artifact is not published to Maven Central.
+
 ## What's in this repo
 
 ```
