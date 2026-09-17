@@ -20,8 +20,12 @@ public class TavilyTools {
 
   private static final Logger LOG = Logger.getLogger(TavilyTools.class);
 
-  /** Cap on text handed back to the model, so one long page can't eat the context window. */
-  private static final int MAX_PAGE_CHARS = 12_000;
+  /**
+   * Cap on text handed back to the model (~15k tokens). Keep it generous: guides like
+   * NerdWallet's MileagePlus page put the earning table past character 12,000, and a tighter
+   * cap had the model fill the missing table in from memory while still citing the page.
+   */
+  private static final int MAX_PAGE_CHARS = 60_000;
 
   @Inject
   TavilyClient tavily;
@@ -133,7 +137,9 @@ public class TavilyTools {
       return "[Fetched %s but the page had no readable text. Pick a different URL.]".formatted(url);
     }
     if (text.length() > MAX_PAGE_CHARS) {
-      text = text.substring(0, MAX_PAGE_CHARS) + "\n\n…[truncated to 12k chars]";
+      text = text.substring(0, MAX_PAGE_CHARS)
+             + "\n\n[TRUNCATED: showing %d of %d chars. Anything past this point is NOT in view. Do not state figures you did not see above.]"
+                 .formatted(MAX_PAGE_CHARS, len);
     }
     return "Page: " + url + "\n\n" + text;
   }

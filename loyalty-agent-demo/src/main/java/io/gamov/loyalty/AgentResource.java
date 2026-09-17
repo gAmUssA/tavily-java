@@ -2,9 +2,11 @@ package io.gamov.loyalty;
 
 import org.jboss.resteasy.reactive.RestStreamElementType;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import dev.langchain4j.model.chat.ChatModel;
+import io.quarkiverse.langchain4j.ChatMemoryRemover;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import jakarta.inject.Inject;
@@ -43,7 +45,7 @@ public class AgentResource {
       CompletableFuture<String> future = CompletableFuture.supplyAsync(
           () -> raw
               ? rawModel.chat(question)
-              : agent.ask(question),
+              : askFresh(question),
           Infrastructure.getDefaultWorkerPool()
       );
 
@@ -68,6 +70,15 @@ public class AgentResource {
         emitter.complete();
       }
     }).runSubscriptionOn(Infrastructure.getDefaultWorkerPool());
+  }
+
+  private String askFresh(String question) {
+    String conversationId = UUID.randomUUID().toString();
+    try {
+      return agent.ask(conversationId, question);
+    } finally {
+      ChatMemoryRemover.remove(agent, conversationId);
+    }
   }
 
   private void drainTo(io.smallrye.mutiny.subscription.MultiEmitter<? super String> emitter) {

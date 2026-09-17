@@ -1,5 +1,6 @@
 package io.gamov.loyalty;
 
+import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import io.quarkiverse.langchain4j.RegisterAiService;
@@ -9,6 +10,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public interface LoyaltyAgent {
 
+  /**
+   * One memory per question. quarkus-langchain4j refuses tools without chat memory, but a shared
+   * default memory made the application-scoped agent answer a repeated question from the previous
+   * conversation in 3s with zero tool calls. Callers pass a fresh id and remove it afterwards.
+   */
   @SystemMessage("""
       You are a senior airline loyalty analyst. You answer questions about MileagePlus, \
       Avianca LifeMiles, Aeroplan, transfer partners, award charts, fare-class earning rates, \
@@ -41,5 +47,5 @@ public interface LoyaltyAgent {
       7. Never fabricate fare-class numbers, transfer ratios, or earning rates. \
          "I don't know" is a valid answer.
       """)
-  String ask(@UserMessage String question);
+  String ask(@MemoryId String conversationId, @UserMessage String question);
 }
